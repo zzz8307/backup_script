@@ -157,26 +157,37 @@ def cal_md5(file, name):
 
 def copy_od(od_path, arc_type, root_dir, logger):
     LOGGER.info("Creating archive {0} to OneDrive.".format(str(BACKUP_NAME)))
-    cnt = 0  # count of failures
 
-    bck_zip = shutil.make_archive(od_path, arc_type, root_dir, logger=logger)
-
-    LOGGER.info("Checking the archive file...")
     try:
-        with zipfile.ZipFile(bck_zip) as zf:
+        bck_zip = shutil.make_archive(od_path, arc_type, root_dir, logger=logger)
+    except Exception:
+        LOGGER.exception("Error occurred.")
+        return
+
+    # check archive integrity
+    archive_check_flag = archive_check(bck_zip)
+    if not archive_check_flag:
+        return copy_od(bck_zip)
+    LOGGER.info("Archive created, let OneDrive take care of the rest!")
+
+
+def archive_check(zip_filename):
+    LOGGER.info("Checking the archive file...")
+    cnt = 0  # count of failures
+    try:
+        with zipfile.ZipFile(zip_filename) as zf:
             zip_check = zf.testzip()
     except Exception:
         LOGGER.exception("Error occurred.")
     if zip_check is not None:
         if cnt > 2:
-            LOGGER.error("Archive integrity check has reached maximum retries - {0}".format(od_path))
+            LOGGER.error("Archive integrity check has reached maximum retries - {0}".format(zip_filename))
             raise ArchiveCheckError
         cnt += 1
         LOGGER.warning("Archive integrity check failed {0} times, retrying...".format(cnt))
-        return copy_od(od_path, arc_type, root_dir, logger=logger)
-    else:
-        LOGGER.info("Check passed.")
-        LOGGER.info("Archive created, let OneDrive take care of the rest!")
+        return False
+    LOGGER.info("Check passed - {0}".format(zip_filename))
+    return True
 
 
 def init():
