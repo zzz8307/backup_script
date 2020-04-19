@@ -3,7 +3,6 @@ import sys
 import time
 import shutil
 import hashlib
-import logging
 import zipfile
 import argparse
 import textwrap
