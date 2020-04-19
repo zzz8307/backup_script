@@ -63,15 +63,15 @@ def main():
 
 
 def copy3(src, dst):
-    LOGGER.info("Start copying - {0}.".format(src))
+    LOGGER.info("Start copying - {0}".format(src))
 
     # run file integrity check if dst exists.
     if os.path.exists(dst):
-        LOGGER.info("File exists - {0}.".format(dst))
+        LOGGER.info("File exists - {0}".format(dst))
         file_check_flag = file_check(src, dst)
         # if pass, skip copying
         if file_check_flag:
-            LOGGER.info("Skipped - {0}.".format(src))
+            LOGGER.info("Skipped - {0}".format(src))
             return dst
 
     st = time.time()
@@ -95,7 +95,7 @@ def copy3(src, dst):
     file_check_flag = file_check(src, dst)
     if not file_check_flag:
         return copy3(src, dst)
-    LOGGER.info("Finished - {0}.".format(src))
+    LOGGER.info("Finished - {0}".format(src))
     return dst
 
 
@@ -123,12 +123,12 @@ def file_check(src, dst):
     dst_md5 = cal_md5(dst, dst_filename)
     if src_md5 != dst_md5:
         if cnt > 2:
-            LOGGER.error("File integrity check has reached maximum retries - {0}.".format(dst_filename))
+            LOGGER.error("File integrity check has reached maximum retries - {0}".format(dst_filename))
             raise FileCheckError
         cnt += 1
         LOGGER.warning("File integrity check failed {0} times, retrying...".format(cnt))
         return False
-    LOGGER.info("Check passed - {0}.".format(dst_filename))
+    LOGGER.info("Check passed - {0}".format(dst_filename))
     return True
 
 
@@ -169,7 +169,7 @@ def copy_od(od_path, arc_type, root_dir, logger):
         LOGGER.exception("Error occurred.")
     if zip_check is not None:
         if cnt > 2:
-            LOGGER.error("Archive integrity check has reached maximum retries - {0}.".format(od_path))
+            LOGGER.error("Archive integrity check has reached maximum retries - {0}".format(od_path))
             raise ArchiveCheckError
         cnt += 1
         LOGGER.warning("Archive integrity check failed {0} times, retrying...".format(cnt))
