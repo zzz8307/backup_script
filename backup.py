@@ -40,10 +40,10 @@ def main():
     except SystemExit:
         return
     except Exception:
-        LOGGER.exception("Error occurred.")
+        LOGGER.exception("Something went wrong.")
         return
 
-    # start backup process
+    # start the backup process
     try:
         LOGGER.info("Starting " + str(BACKUP_NAME))
         shutil.copytree(src_path, dst_path, ignore=_logpath, copy_function=copy3, dirs_exist_ok=dst_exists_flag)
@@ -54,7 +54,7 @@ def main():
     except FileCheckError:
         LOGGER.exception("File integrity check failed.")
     except ArchiveCheckError:
-        LOGGER.exception("OneDrive archive integrity check failed.")
+        LOGGER.exception("Archive to OneDrive failed.")
     except Exception:
         LOGGER.exception("Backup failed.")
     else:
