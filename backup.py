@@ -39,22 +39,25 @@ def main():
         src_path, dst_path, onedrive_path, onedrive_flag, dst_exists_flag = init()
     except SystemExit:
         return
+    except FileNotFoundError:
+        LOGGER.error("Source path doesn't exist.")
+        return
     except Exception:
-        LOGGER.exception("Something went wrong.")
+        LOGGER.exception("Error occurred.")
         return
 
-    # start the backup process
+    # start backup process
+    LOGGER.info("Starting " + str(BACKUP_NAME))
     try:
-        LOGGER.info("Starting " + str(BACKUP_NAME))
         shutil.copytree(src_path, dst_path, ignore=_logpath, copy_function=copy3, dirs_exist_ok=dst_exists_flag)
         if onedrive_flag:
             copy_od(onedrive_path, "zip", dst_path, logger=LOGGER)
     except KeyboardInterrupt:
         LOGGER.error("Cancelled by user.")
     except FileCheckError:
-        LOGGER.exception("File integrity check failed.")
+        LOGGER.error("File integrity check failed.")
     except ArchiveCheckError:
-        LOGGER.exception("Archive to OneDrive failed.")
+        LOGGER.error("OneDrive archive integrity check failed.")
     except Exception:
         LOGGER.exception("Backup failed.")
     else:
@@ -82,13 +85,10 @@ def copy3(src, dst):
     pg_thread.start()
     LOGGER.debug(pg_thread)
 
-    try:
-        shutil.copy2(src, dst)
-    except Exception:
-        LOGGER.exception("Error occurred.")
-        return
-    LOGGER.debug(pg_thread)
+    # copy the file
+    shutil.copy2(src, dst)
     LOGGER.info("Copy completed. Time spent: {:.3f}s".format(time.time() - st))
+    LOGGER.debug(pg_thread)
 
     # check file integrity
     file_check_flag = file_check(src, dst)
@@ -100,13 +100,12 @@ def copy3(src, dst):
 
 def copy3_progress(src, dst):
     while not os.path.exists(dst):
-        time.sleep(0.1)
+        time.sleep(.5)
 
     src_size = os.path.getsize(src)
-
     while (dst_size := os.path.getsize(dst)) < src_size:
         print("{:.3f}%".format(dst_size / src_size * 100), end='\r')
-        time.sleep(0.1)
+        time.sleep(.5)
 
 
 def file_check(src, dst):
@@ -221,7 +220,6 @@ def init():
     dst_exists_flag = args.dst_exists_flag
 
     if not os.path.exists(src_path):
-        LOGGER.error("Source path doesn't exist.")
         raise FileNotFoundError
 
     if onedrive_flag:
