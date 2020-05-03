@@ -88,7 +88,6 @@ def copy3(src, dst):
     # copy the file
     shutil.copy2(src, dst)
     LOGGER.info("Copy completed. Time spent: {:.3f}s".format(time.time() - st))
-    LOGGER.debug(pg_thread)
 
     # check file integrity
     file_check_flag = file_check(src, dst)
